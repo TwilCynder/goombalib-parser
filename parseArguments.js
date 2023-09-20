@@ -34,11 +34,11 @@ export function parseArguments(args, ...parsers){
 }
 
 export class OutputModeParser extends Parser {
-    constructor(){
+    constructor(default_stdout_mode = null, default_file = null){
         super();
         this._state = {
-            file: null,
-            stdout: null,
+            file: default_file,
+            stdout: default_stdout_mode,
         }
     }
 
