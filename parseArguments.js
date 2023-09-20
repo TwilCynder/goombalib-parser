@@ -17,9 +17,7 @@ export class Parser {
 export function parseArguments(args, ...parsers){
     for (let argIndex = 0; argIndex < args.length;){
         for (let parser of parsers){
-            console.log("Parsing arg", argIndex, "with", parser);
             let res = parser.parse(args, argIndex);
-            console.log("Result :", res)
             if (res === true) {
                 break;
             } else if (typeof res == "number"){
@@ -30,7 +28,6 @@ export function parseArguments(args, ...parsers){
             break;
         }
         argIndex++;
-        console.log("New arg index : ", argIndex, args.length);
     }
 
     return parsers.map( parser => parser.getState());
