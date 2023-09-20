@@ -21,5 +21,6 @@
   "homepage": "https://github.com/TwilCynder/goombalib-js#readme",
   "publishConfig": {
     "@YOUR-USERNAME:registry": "https://npm.pkg.github.com"
-  }
+  },
+  "type": "module"
 }
