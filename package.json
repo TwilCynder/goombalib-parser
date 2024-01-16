@@ -1,6 +1,6 @@
 {
   "name": "@twilcynder/goombalib-js",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "description": "Sometimes I need to make functions that might be useful for other developers. This is where i put them. No dependencies.",
   "main": "main.js",
   "scripts": {
