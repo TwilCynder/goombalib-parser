@@ -116,6 +116,7 @@ export class SingleOptionParser extends Parser {
     parse(args, i){
         if (args[i] == this.#trigger){
             this._state = this.getArg(args, i + 1);
+            return 1;
         }
     }
 }
