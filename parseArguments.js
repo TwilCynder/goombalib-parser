@@ -15,7 +15,7 @@ export class Parser {
     /**
      * Given the arguments array and the current argument arrays, will add something to the state or not depending on if this argument is relevant to this parser.
      * Then returns either true if the argument shouldn't be handled by anyone else, false if it wasn't relevant to the parser and should be handled
-     * by another parser, or a number n if the method handled the current argument but also the next n ones, which should then be skipped 
+     * by another parser, or a number n if the method handled the current argument but also the next n ones (see the getArg method), which should then be skipped 
      * @param {string[]} args 
      * @param {number} i 
      * @returns {number|boolean}
@@ -24,6 +24,26 @@ export class Parser {
 
     getState(){
         return this._state;
+    }
+
+    onMissingArgument(){
+        throw "Missing argument"
+    }
+
+    /**
+     * Returns the ith element in the args array, or handles the case where the requested index is out of bounds 
+     * (typically, when parsing argument n° x you needed to read the next argument but that argument was not provided).
+     * In that case, it calls the onMissingArgument method. Should that method throw an exception, this exception would be handled
+     * by parseArguments ; that's the intended use for overloads of onMissingArgument, and the default implementation simply throws with "Missing Argument"
+     * @param {string[]} args 
+     * @param {number} i 
+     */
+    getArg(args, i){
+        if (i >= args.length){
+            this.onMissingArgument();
+        }
+
+        return args[i];
     }
 }
 
@@ -70,7 +90,7 @@ export class SingleArgumentParser extends Parser {
      * @param {boolean} last If false, will take the first argument and no other, if true, will take all arguments given to it and save the last one 
      */
     constructor(last){
-        super()
+        super();
         this.#last = last
     }
 
@@ -83,26 +103,52 @@ export class SingleArgumentParser extends Parser {
 }
 
 /**
+ * Parser for parseArguments that looks for a specific argument (generally an option starting with a -) and saves the next argument (ideal for arguments like "-f filename")
+ */
+export class SingleOptionParser extends Parser {
+    #trigger;
+
+    constructor(trigger){
+        super();
+        this.#trigger = trigger;
+    }
+
+    parse(args, i){
+        if (args[i] == this.#trigger){
+            this._state = this.getArg(args, i + 1);
+        }
+    }
+}
+
+/**
  * Goes through all the given arguments and feeds them to each given Parser, then returns an array containing the final state of each Parser
  * @param {string[]} args 
  * @param  {...Parser} parsers 
  * @returns 
  */
 export function parseArguments(args, ...parsers){
-    for (let argIndex = 0; argIndex < args.length;){
-        for (let parser of parsers){
-            let res = parser.parse(args, argIndex);
-            if (res === true) {
-            } else if (typeof res == "number"){
-                argIndex += res;
-            } else {
-                continue;
-            }
-            break;
-        }
-        argIndex++;
-    }
 
-    return parsers.map( parser => parser.getState());
+    try {
+        for (let argIndex = 0; argIndex < args.length;){
+            for (let parser of parsers){
+                
+    
+                let res = parser.parse(args, argIndex);
+                if (res === true) {
+                } else if (typeof res == "number"){
+                    argIndex += res;
+                } else {
+                    continue;
+                }
+                break;
+            }
+            argIndex++;
+        }
+    
+        return parsers.map( parser => parser.getState());
+    } catch (err){
+        console.error("Could not parse arguments : ", err);
+        return [];
+    }
 }
 
