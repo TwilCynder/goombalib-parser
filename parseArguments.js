@@ -103,14 +103,40 @@ export class SingleArgumentParser extends Parser {
 }
 
 /**
+ * Parser for parseArguments that looks for a specific argument, and ultimately returns whether it was found or not (ideal for switches)
+ */
+export class SingleSwitchParser extends Parser {
+    #trigger;
+
+    /**
+     * @param {string} trigger The argument to look for
+     */
+    constructor(trigger){
+        super();
+        this.#trigger = trigger;
+    }
+
+    parse(args, i){
+        if (args[i] == this.#trigger){
+            this._state = true;
+            return true;
+        }
+    } 
+}
+
+/**
  * Parser for parseArguments that looks for a specific argument (generally an option starting with a -) and saves the next argument (ideal for arguments like "-f filename")
  */
 export class SingleOptionParser extends Parser {
     #trigger;
 
+    /**
+     * @param {string} trigger The argument to look for
+     */
     constructor(trigger){
         super();
         this.#trigger = trigger;
+        this._state = false;
     }
 
     parse(args, i){
