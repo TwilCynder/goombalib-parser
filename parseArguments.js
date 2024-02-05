@@ -56,9 +56,8 @@ export class Parser {
         let arr = arg.split(/=/g);
         if (arr.length == 2){
             return arr;
-        } else {
-            [false]
         }
+        return [false];
     }
 }
 
