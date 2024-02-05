@@ -38,12 +38,27 @@ export class Parser {
      * @param {string[]} args 
      * @param {number} i 
      */
-    getArg(args, i){
+    static getArg(args, i){
         if (i >= args.length){
             this.onMissingArgument();
         }
 
         return args[i];
+    }
+
+    /**
+     * If the argument is a property assignment (any string of form "this=that"), returns ["this", "that"]. 
+     * If it is not, returns [false]  
+     * Typical usage : let [prop, value] = Parser.propertyAssignment(arg) ; if (prop) ...
+     * @param {string} arg 
+     */
+    static propertyAssignment(arg){
+        let arr = arg.split(/=/g);
+        if (arr.length == 2){
+            return arr;
+        } else {
+            [false]
+        }
     }
 }
 
@@ -141,8 +156,27 @@ export class SingleOptionParser extends Parser {
 
     parse(args, i){
         if (args[i] == this.#trigger){
-            this._state = this.getArg(args, i + 1);
+            this._state = Parser.getArg(args, i + 1);
             return 1;
+        }
+    }
+}
+
+/**
+ * Parser for parseArguments that takes all "propery assignment" arguments (of form "string1=string2"), 
+ * and returns an object with all these pairs as key-values.  
+ */
+
+export class PropertiesParser extends Parser {
+    constructor(){
+        super();
+        this._state = {};
+    } 
+
+    parse(args, i){
+        let [prop, value] = Parser.propertyAssignment(args[i]);
+        if (prop){
+            this._state[prop] = value;
         }
     }
 }
