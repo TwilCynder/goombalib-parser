@@ -176,6 +176,7 @@ export class PropertiesParser extends Parser {
         let [prop, value] = Parser.propertyAssignment(args[i]);
         if (prop){
             this._state[prop] = value;
+            return true;
         }
     }
 }
