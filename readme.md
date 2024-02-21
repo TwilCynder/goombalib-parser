@@ -1,3 +1,3 @@
-# Goomba Lib - JS
+# NodeJS Arguments Parser(s)
 
-Sometimes I need to make functions that might be useful for other developers. This is where i put them. 
+This module provides various ways of easily parsing arguments given to a program (or any array of strings actually).  
