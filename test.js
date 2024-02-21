@@ -9,3 +9,11 @@ let [option, sw, arg, props] = m.parseArguments(process.argv.slice(2), new m.Sin
 console.log(m.usageMessage("one-argument -d a-second-argument -f 1"));
 
 console.log(option, sw, arg, props);
+
+
+let result = m.parseArgumentsNamed(process.argv.slice(2), 
+    {"file": new m.SingleOptionParser("-f") , "DDD": new m.SingleSwitchParser("-d"), "firstArg" : new m.SingleArgumentParser(false), 
+    "properties" : new m.PropertiesParser()}, true
+);
+
+console.log(result);

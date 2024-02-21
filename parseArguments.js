@@ -182,6 +182,49 @@ export class PropertiesParser extends Parser {
 }
 
 /**
+ * 
+ * @param {string[]} args 
+ * @param {{}} parsers 
+ * @param {boolean} namedArgumentsParsing
+ */
+export function parseArgumentsNamed(args, parsers, namedArgumentsParsing){
+    try {
+        let result = {}
+
+        let parsers_ = Object.values(parsers);
+        for (let argIndex = 0; argIndex < args.length; argIndex++){
+            if (namedArgumentsParsing){
+                let arg = args[argIndex];
+                let arr = arg.split(/=/g);
+                if (arr.length == 2){
+                    result[arr[0]] = arr[1];
+                    continue;
+                }       
+            }
+            for (let parser of parsers_){
+                let res = parser.parse(args, argIndex);
+                if (res === true) {
+                } else if (typeof res == "number"){
+                    argIndex += res;
+                } else {
+                    continue;
+                }
+                break;
+            }
+        }
+    
+        for (let k in parsers){
+            result[k] = parsers[k].getState();
+        }
+
+        return result;
+    } catch (err){
+        console.error("Could not parse arguments : ", err);
+        return {};
+    }
+}
+
+/**
  * Goes through all the given arguments and feeds them to each given Parser, then returns an array containing the final state of each Parser
  * @param {string[]} args 
  * @param  {...Parser} parsers 
@@ -212,4 +255,3 @@ export function parseArguments(args, ...parsers){
         return [];
     }
 }
-
