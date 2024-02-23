@@ -38,7 +38,7 @@ export class Parser {
      * @param {string[]} args 
      * @param {number} i 
      */
-    static getArg(args, i){
+    getArg(args, i){
         if (i >= args.length){
             this.onMissingArgument();
         }
@@ -95,6 +95,21 @@ export class OutputModeParser extends Parser {
 }
 
 /**
+ * Parser for parseArguments that saves all argumements it received
+ */
+export class AllArgumentsParser extends Parser {
+    constructor(){
+        super();
+        this._state = [];
+    }
+
+    parse(args, i){
+        this._state.push(args[i]);
+        return true;
+    }
+}
+
+/**
  * Parser for parseArguments that saves a single argument (and returns it as its state)
  */
 export class SingleArgumentParser extends Parser {
@@ -123,17 +138,36 @@ export class SingleSwitchParser extends Parser {
     #trigger;
 
     /**
-     * @param {string} trigger The argument to look for
+     * @param {string | string[]} trigger The argument, or a list of arguments, to look for
      */
     constructor(trigger){
         super();
         this.#trigger = trigger;
+        this._state = false;
     }
 
-    parse(args, i){
+    #parseArray(args, i){
+        for (let sw of this.#trigger){
+            if (args[i] == sw){
+                this._state = true;
+                return true;
+            }
+        }
+    }
+
+    #parseSingle(args, i){
+
         if (args[i] == this.#trigger){
             this._state = true;
             return true;
+        }
+    }
+
+    parse(args, i){
+        if (this.#trigger instanceof Array){
+            return this.#parseArray(args, i);
+        } else {
+            return this.#parseSingle(args, i);
         }
     } 
 }
@@ -147,18 +181,36 @@ export class SingleOptionParser extends Parser {
     /**
      * @param {string} trigger The argument to look for
      */
-    constructor(trigger){
+    constructor(trigger, default_value = null){
         super();
         this.#trigger = trigger;
-        this._state = false;
+        this._state = default_value;
     }
 
-    parse(args, i){
+    #parseArray(args, i){
+        for (let sw of this.#trigger){
+            if (args[i] == sw){
+                this._state = this.getArg(args, i + 1);
+                return 1;
+            }
+        }
+    }
+
+    #parseSingle(args, i){
+
         if (args[i] == this.#trigger){
-            this._state = Parser.getArg(args, i + 1);
+            this._state = this.getArg(args, i + 1);
             return 1;
         }
     }
+
+    parse(args, i){
+        if (this.#trigger instanceof Array){
+            return this.#parseArray(args, i);
+        } else {
+            return this.#parseSingle(args, i);
+        }
+    } 
 }
 
 /**
@@ -253,5 +305,25 @@ export function parseArguments(args, ...parsers){
     } catch (err){
         console.error("Could not parse arguments : ", err);
         return [];
+    }
+}
+
+
+export class ArgumentsManager {
+    #parsers = [];
+
+    /**
+     * 
+     * @param {string | string[]} sw 
+     * @param {{dest?: string, description?: string}} options 
+     */
+    addOption(sw, options){
+        this.#parsers.push(new SingleOptionParser(sw_));
+        let dest = null;
+        let singleHyphenTrigger = false;
+        if (sw instanceof Array){
+            for (let sw_ of sw){
+            }
+        }
     }
 }
