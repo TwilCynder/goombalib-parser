@@ -30,6 +30,19 @@ export class Parser {
         throw "Missing argument"
     }
 
+
+    /**
+     * Returns a short string describing the syntax for the arguments this parser is looking for.
+     * @param {string} name the name associated with this instance of the Parser. See implementations of this method for good examples.
+     */
+    getUsageText(name, optional){
+        return "Unknown parameter : " + name;
+    }
+
+    usageTextCustomHandleOptional(){
+        return false;
+    }
+
     /**
      * Returns the ith element in the args array, or handles the case where the requested index is out of bounds 
      * (typically, when parsing argument n° x you needed to read the next argument but that argument was not provided).
@@ -92,6 +105,10 @@ export class OutputModeParser extends Parser {
     
         return false;
     }
+
+    getUsageText(){
+        return "[-o file] [--stringified-output | --log-output]"
+    }
 }
 
 /**
@@ -106,6 +123,10 @@ export class AllArgumentsParser extends Parser {
     parse(args, i){
         this._state.push(args[i]);
         return true;
+    }
+
+    getUsageText(name){
+        return name + " ..."
     }
 }
 
@@ -129,12 +150,13 @@ export class SingleArgumentParser extends Parser {
             return true;
         }
     }
+
+    getUsageText(name){
+        return name
+    }
 }
 
-/**
- * Parser for parseArguments that looks for a specific argument, and ultimately returns whether it was found or not (ideal for switches)
- */
-export class SingleSwitchParser extends Parser {
+class TriggerParser_ extends Parser {
     #trigger;
 
     /**
@@ -143,31 +165,57 @@ export class SingleSwitchParser extends Parser {
     constructor(trigger){
         super();
         this.#trigger = trigger;
-        this._state = false;
     }
 
-    #parseArray(args, i){
+    isTriggerArray(){
+        return this.#trigger instanceof Array;
+    }
+
+    #detectTriggerSingle(arg){
+        if (arg == this.#trigger){
+            return true;
+        }
+    }
+
+    #detectTriggerArray(arg){
         for (let sw of this.#trigger){
-            if (args[i] == sw){
-                this._state = true;
+            if (arg == sw){
                 return true;
             }
         }
     }
 
-    #parseSingle(args, i){
+    detectTrigger(arg){
+        return this.isTriggerArray() ? this.#detectTriggerArray(arg) : this.#detectTriggerSingle(arg);
+    }
 
-        if (args[i] == this.#trigger){
-            this._state = true;
-            return true;
+    getUsageText(){
+        if (this.isTriggerArray()){
+            let res = "";
+            for (let i = 0; i < this.#trigger.length - 1; i++){
+                res += this.#trigger[i] + "/";
+            }
+            return res + (this.#trigger.length > 0 ? this.#trigger.at(-1): "");
         }
+    }
+}
+
+/**
+ * Parser for parseArguments that looks for a specific argument, and ultimately returns whether it was found or not (ideal for switches)
+ */
+export class SingleSwitchParser extends TriggerParser_ {
+    /**
+     * @param {string | string[]} trigger The argument, or a list of arguments, to look for
+     */
+    constructor(trigger){
+        super(trigger);
+        this._state = false;
     }
 
     parse(args, i){
-        if (this.#trigger instanceof Array){
-            return this.#parseArray(args, i);
-        } else {
-            return this.#parseSingle(args, i);
+        if (this.detectTrigger(args[i])){
+            this._state = true;
+            return true;
         }
     } 
 }
@@ -175,42 +223,40 @@ export class SingleSwitchParser extends Parser {
 /**
  * Parser for parseArguments that looks for a specific argument (generally an option starting with a -) and saves the next argument (ideal for arguments like "-f filename")
  */
-export class SingleOptionParser extends Parser {
-    #trigger;
+export class SingleOptionParser extends TriggerParser_ {
 
     /**
      * @param {string} trigger The argument to look for
      */
     constructor(trigger, default_value = null){
-        super();
-        this.#trigger = trigger;
+        super(trigger);
         this._state = default_value;
     }
 
-    #parseArray(args, i){
-        for (let sw of this.#trigger){
-            if (args[i] == sw){
-                this._state = this.getArg(args, i + 1);
-                return 1;
-            }
+    parse(args, i){
+        if (this.detectTrigger(args[i])){
+            this._state = this.getArg(args, i + 1);;
+            return true;
         }
-    }
+    } 
 
-    #parseSingle(args, i){
+}
 
-        if (args[i] == this.#trigger){
-            this._state = this.getArg(args, i + 1);
-            return 1;
-        }
+export class SinglePropertyParser extends Parser {
+    #propName;
+
+    constructor(propName, default_value = null){
+        super();
+        this.#propName = propName;
+        this._state = default_value;
     }
 
     parse(args, i){
-        if (this.#trigger instanceof Array){
-            return this.#parseArray(args, i);
-        } else {
-            return this.#parseSingle(args, i);
+        let [prop, value] = Parser.propertyAssignment(args[i]);
+        if (prop && prop == this.#propName){
+            this._state = value;
         }
-    } 
+    }
 }
 
 /**
@@ -246,12 +292,11 @@ export function parseArgumentsNamed(args, parsers, namedArgumentsParsing){
         let parsers_ = Object.values(parsers);
         for (let argIndex = 0; argIndex < args.length; argIndex++){
             if (namedArgumentsParsing){
-                let arg = args[argIndex];
-                let arr = arg.split(/=/g);
-                if (arr.length == 2){
-                    result[arr[0]] = arr[1];
+                let [prop, value] = Parser.propertyAssignment(args[argIndex]);
+                if (prop){
+                    result[prop] = value;
                     continue;
-                }       
+                }    
             }
             for (let parser of parsers_){
                 let res = parser.parse(args, argIndex);
@@ -305,25 +350,5 @@ export function parseArguments(args, ...parsers){
     } catch (err){
         console.error("Could not parse arguments : ", err);
         return [];
-    }
-}
-
-
-export class ArgumentsManager {
-    #parsers = [];
-
-    /**
-     * 
-     * @param {string | string[]} sw 
-     * @param {{dest?: string, description?: string}} options 
-     */
-    addOption(sw, options){
-        this.#parsers.push(new SingleOptionParser(sw_));
-        let dest = null;
-        let singleHyphenTrigger = false;
-        if (sw instanceof Array){
-            for (let sw_ of sw){
-            }
-        }
     }
 }
