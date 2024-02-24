@@ -240,6 +240,10 @@ export class SingleOptionParser extends TriggerParser_ {
         }
     } 
 
+    getUsageText(name){
+        return super.getUsageText() + " " + name
+    }
+
 }
 
 export class SinglePropertyParser extends Parser {
@@ -256,6 +260,10 @@ export class SinglePropertyParser extends Parser {
         if (prop && prop == this.#propName){
             this._state = value;
         }
+    }
+
+    getUsageText(name){
+        return this.#propName + "=" + name;
     }
 }
 
@@ -276,6 +284,10 @@ export class PropertiesParser extends Parser {
             this._state[prop] = value;
             return true;
         }
+    }
+
+    getUsageText(name){
+        return "(additional configuration properties) propName=value";
     }
 }
 
