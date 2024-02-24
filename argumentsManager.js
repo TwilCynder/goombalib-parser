@@ -1,4 +1,4 @@
-import {Parser, SingleOptionParser} from "./parseArguments.js";
+import {Parser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
 
 function findPotentialNameInTriggers(sw){
     let dest;
@@ -81,7 +81,7 @@ export class ArgumentsManager {
         }
 
         this.#parameters.push({
-            parser: new SingleOptionParser(sw),
+            parser: new SingleSwitchParser(sw),
             dest,
             optional,
             description: options.description
@@ -136,8 +136,6 @@ export class ArgumentsManager {
                 break;
             }
         }
-    
-        console.log(this.#parameters);
 
         for (let param of this.#parameters){
             let state = param.parser.getState();

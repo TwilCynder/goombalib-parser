@@ -196,6 +196,8 @@ class TriggerParser_ extends Parser {
                 res += this.#trigger[i] + "/";
             }
             return res + (this.#trigger.length > 0 ? this.#trigger.at(-1): "");
+        } else {
+            return this.#trigger;
         }
     }
 }
