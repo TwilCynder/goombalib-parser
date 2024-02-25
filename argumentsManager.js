@@ -74,7 +74,7 @@ export class ArgumentsManager {
      * @param {{description?: string}} options 
      * @param {boolean} optional 
      */
-    addParameter(dest, options, optional = true){
+    addParameter(dest, options = {}, optional = true){
         this.#parameters.push({
             parser: new SingleArgumentParser(),
             dest, 
@@ -134,7 +134,7 @@ export class ArgumentsManager {
     }
 
     enableHelpParameter(){
-        this.#parameters.push({
+        this.#parameters.unshift({
             parser: new (class extends Parser {
                 #am;
                 constructor(argumentsManager){
