@@ -152,6 +152,8 @@ export class ArgumentsManager {
             })(this),
             hidden: true
         })
+
+        return this;
     }
 
     parseArguments(args, checkMissingNeededArgument = true){
