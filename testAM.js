@@ -7,7 +7,8 @@ manager
     .addOption(["-o", "--option"], {description: "An Option"})
     .addParameter("param", {description: "A parameter"}, false)
     .setAbstract("A test program")
-    .setMissingArgumentBehavior("Missing mandatory argument", null, true);
+    .setMissingArgumentBehavior("Missing mandatory argument", null, true)
+    .enableHelpParameter()
 
 let result = manager.parseArguments(process.argv.slice(2));
 

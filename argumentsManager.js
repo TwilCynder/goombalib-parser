@@ -1,3 +1,4 @@
+import {basename} from 'path';
 import {Parser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
 
 function findPotentialNameInTriggers(sw){
@@ -42,6 +43,7 @@ export class ArgumentsManager {
      *  dest: string
      *  optional: boolean
      *  description: string
+     *  hidden?: boolean
      * }[] }
      */
     #parameters = [];
@@ -68,6 +70,23 @@ export class ArgumentsManager {
 
     /**
      * 
+     * @param {string} dest 
+     * @param {{description?: string}} options 
+     * @param {boolean} optional 
+     */
+    addParameter(dest, options, optional = true){
+        this.#parameters.push({
+            parser: new SingleArgumentParser(),
+            dest, 
+            optional, 
+            description: options.description
+        })
+
+        return this
+    }
+
+    /**
+     * 
      * @param {string | string[]} sw 
      * @param {{dest?: string, description?: string}} options 
      */
@@ -88,23 +107,6 @@ export class ArgumentsManager {
         });
 
         return this;
-    }
-    
-    /**
-     * 
-     * @param {string} dest 
-     * @param {{description?: string}} options 
-     * @param {boolean} optional 
-     */
-    addParameter(dest, options, optional = true){
-        this.#parameters.push({
-            parser: new SingleArgumentParser(),
-            dest, 
-            optional, 
-            description: options.description
-        })
-
-        return this
     }
 
     /**
@@ -129,6 +131,27 @@ export class ArgumentsManager {
         });
 
         return this;
+    }
+
+    enableHelpParameter(){
+        this.#parameters.push({
+            parser: new (class extends Parser {
+                #am;
+                constructor(argumentsManager){
+                    super();
+                    this.#am = argumentsManager;
+                }
+
+                parse(args, i){
+                    let arg = args[i];
+                    if (arg == "-h" || arg == "--help"){
+                        console.log(this.#am.makeHelp(basename(process.argv[0]) + " " + basename(process.argv[1])))
+                        process.exit(0);
+                    }
+                }
+            })(this),
+            hidden: true
+        })
     }
 
     parseArguments(args, checkMissingNeededArgument = true){
@@ -178,6 +201,7 @@ export class ArgumentsManager {
     makeUsageMessage(programName){
         let result = programName ? programName + " " : "";
         for (let p of this.#parameters){
+            if (p.hidden) continue;
             result += p.optional ?
                 `[${p.parser.getUsageText(p.dest)}] ` : 
                 p.parser.getUsageText(p.dest) + " ";
@@ -189,6 +213,7 @@ export class ArgumentsManager {
     makeHelp(programName){
         let result = "Usage : " + this.makeUsageMessage(programName) + "\n" + this.#abstract + "\n";
         for (let param of this.#parameters){
+            if (param.hidden) continue;
             result += "\t" + param.parser.getUsageText(param.dest) + "\t: " + (param.description ?? "(undocumented)") + "\n";
         }
         return result;
