@@ -71,12 +71,12 @@ export class ArgumentsManager {
     /**
      * 
      * @param {string} dest 
-     * @param {{description?: string}} options 
+     * @param {{description?: string, default?: any}} options 
      * @param {boolean} optional 
      */
     addParameter(dest, options = {}, optional = true){
         this.#parameters.push({
-            parser: new SingleArgumentParser(),
+            parser: new SingleArgumentParser(options.default),
             dest, 
             optional, 
             description: options.description
@@ -112,7 +112,7 @@ export class ArgumentsManager {
     /**
      * 
      * @param {string | string[]} sw 
-     * @param {{dest?: string, description?: string}} options 
+     * @param {{dest?: string, description?: string, default?: any}} options 
      */
     addOption(sw, options = {}, optional = true){
         let dest;
@@ -124,7 +124,7 @@ export class ArgumentsManager {
         }
 
         this.#parameters.push({
-            parser: new SingleOptionParser(sw),
+            parser: new SingleOptionParser(sw, options.default),
             dest,
             optional,
             description: options.description
