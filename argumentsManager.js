@@ -1,4 +1,4 @@
-import {Parser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
+import {Parser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
 
 function findPotentialNameInTriggers(sw){
     let dest;
@@ -89,6 +89,23 @@ export class ArgumentsManager {
 
         return this;
     }
+    
+    /**
+     * 
+     * @param {string} dest 
+     * @param {{description?: string}} options 
+     * @param {boolean} optional 
+     */
+    addParameter(dest, options, optional = true){
+        this.#parameters.push({
+            parser: new SingleArgumentParser(),
+            dest, 
+            optional, 
+            description: options.description
+        })
+
+        return this
+    }
 
     /**
      * 
@@ -147,7 +164,7 @@ export class ArgumentsManager {
                     process.exit(this.#missingArgumentBehavior.errorCode);
                 }
                 if (this.#missingArgumentBehavior.throw_){
-                    throw MissingArgumentError(this.#missingArgumentBehavior.message ? this.#missingArgumentBehavior.message + " : " + param.parser.getUsageText(param.dest) : param.parser.getUsageText(param.dest));
+                    throw new MissingArgumentError(this.#missingArgumentBehavior.message ? this.#missingArgumentBehavior.message + " : " + param.parser.getUsageText(param.dest) : param.parser.getUsageText(param.dest));
                 }
 
             }
@@ -163,14 +180,17 @@ export class ArgumentsManager {
         for (let p of this.#parameters){
             result += p.optional ?
                 `[${p.parser.getUsageText(p.dest)}] ` : 
-                p.parser.getUsageText(p.dest) + " "
+                p.parser.getUsageText(p.dest) + " ";
         }
 
         return result;
     }
 
     makeHelp(programName){
-        let result = "Usage : " + this.makeUsageMessage(programName) + "\n" + this.#abstract;
+        let result = "Usage : " + this.makeUsageMessage(programName) + "\n" + this.#abstract + "\n";
+        for (let param of this.#parameters){
+            result += "\t" + param.parser.getUsageText(param.dest) + "\t: " + (param.description ?? "(undocumented)") + "\n";
+        }
         return result;
     }
 }

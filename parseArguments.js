@@ -126,7 +126,7 @@ export class AllArgumentsParser extends Parser {
     }
 
     getUsageText(name){
-        return name + " ..."
+        return `<${name}> ...`
     }
 }
 
@@ -152,7 +152,7 @@ export class SingleArgumentParser extends Parser {
     }
 
     getUsageText(name){
-        return name
+        return `<${name}>`
     }
 }
 
@@ -238,12 +238,12 @@ export class SingleOptionParser extends TriggerParser_ {
     parse(args, i){
         if (this.detectTrigger(args[i])){
             this._state = this.getArg(args, i + 1);;
-            return true;
+            return 1;
         }
     } 
 
     getUsageText(name){
-        return super.getUsageText() + " " + name
+        return super.getUsageText() + ` <${name}>`;
     }
 
 }
@@ -265,7 +265,7 @@ export class SinglePropertyParser extends Parser {
     }
 
     getUsageText(name){
-        return this.#propName + "=" + name;
+        return this.#propName + "=<" + name + ">";
     }
 }
 
