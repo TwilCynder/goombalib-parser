@@ -50,7 +50,7 @@ export class ArgumentsManager {
 
     #abstract = "";
 
-    #missingArgumentBehavior = {};
+    #missingArgumentBehavior = {throw_: true};
 
     setAbstract(abstract){
         this.#abstract = abstract;
