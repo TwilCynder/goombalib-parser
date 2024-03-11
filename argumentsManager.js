@@ -197,7 +197,10 @@ export class ArgumentsManager {
         }
 
         return result;
+    }
 
+    parseProcessArguments(checkMissingNeededArgument){
+        return this.parseArguments(process.argv.slice(2));
     }
 
     makeUsageMessage(programName){
