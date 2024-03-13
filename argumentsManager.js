@@ -150,7 +150,8 @@ export class ArgumentsManager {
                     }
                 }
             })(this),
-            hidden: true
+            hidden: true,
+            optional: true
         })
 
         return this;
