@@ -123,7 +123,7 @@ export class ArgumentsManager {
             dest = findPotentialNameInTriggers(sw);
         }
 
-        this.#parameters.push({
+        this.#parameters.unshift({
             parser: new SingleOptionParser(sw, options.default),
             dest,
             optional,
