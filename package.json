@@ -1,6 +1,6 @@
 {
   "name": "@twilcynder/arguments-parser",
-  "version": "1.8.4",
+  "version": "1.9.0",
   "description": "Sometimes I need to make functions that might be useful for other developers. This is where i put them. No dependencies.",
   "main": "main.js",
   "scripts": {
