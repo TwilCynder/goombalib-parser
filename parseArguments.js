@@ -139,9 +139,10 @@ export class SingleArgumentParser extends Parser {
     /**
      * @param {boolean} last If false, will take the first argument and no other, if true, will take all arguments given to it and save the last one 
      */
-    constructor(last){
+    constructor(last, default_value = null){
         super();
-        this.#last = last
+        this.#last = last;
+        this._state = default_value;
     }
 
     parse(args, i){
