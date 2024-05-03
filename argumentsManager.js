@@ -38,15 +38,29 @@ export class MissingArgumentError extends Error {
 
 export class ArgumentsManager {
     /**
-     * @type { {
+     * @typedef {{
      *  parser: Parser
      *  dest: string
      *  optional: boolean
      *  description: string
      *  hidden?: boolean
-     * }[] }
+     * }[]} ParsersList 
      */
-    #parameters = [];
+
+    /**
+     * @type { {
+     *  option: ParsersList,
+     *  switch: ParsersList,
+     *  singleArg: ParsersList,
+     *  allArgs: ParsersList
+     * } }
+     */
+    #parameters = {
+        option: [],
+        switch: [],
+        singleArg: [],
+        allArgs: []
+    }
 
     #abstract = "";
 
@@ -75,7 +89,7 @@ export class ArgumentsManager {
      * @param {boolean} optional 
      */
     addParameter(dest, options = {}, optional = true){
-        this.#parameters.push({
+        this.#parameters.singleArg.push({
             parser: new SingleArgumentParser(options.last),
             dest, 
             optional, 
@@ -99,7 +113,7 @@ export class ArgumentsManager {
             dest = findPotentialNameInTriggers(sw);
         }
 
-        this.#parameters.push({
+        this.#parameters.switch.push({
             parser: new SingleSwitchParser(sw),
             dest,
             optional,
@@ -123,7 +137,7 @@ export class ArgumentsManager {
             dest = findPotentialNameInTriggers(sw);
         }
 
-        this.#parameters.unshift({
+        this.#parameters.option.push({
             parser: new SingleOptionParser(sw, options.default),
             dest,
             optional,
@@ -134,7 +148,7 @@ export class ArgumentsManager {
     }
 
     enableHelpParameter(){
-        this.#parameters.unshift({
+        this.#parameters.switch.push({
             parser: new (class extends Parser {
                 #am;
                 constructor(argumentsManager){
@@ -157,8 +171,17 @@ export class ArgumentsManager {
         return this;
     }
 
+    getAllParameters(){
+        return this.#parameters.switch
+            .concat(this.#parameters.option)
+            .concat(this.#parameters.singleArg)
+            .concat(this.#parameters.allArgs)
+    }
+
     parseArguments(args, checkMissingNeededArgument = true){
         let result = {}
+
+        let allParams = this.getAllParameters();
 
         for (let argIndex = 0; argIndex < args.length; argIndex++){
             /*if (namedArgumentsParsing){
@@ -168,7 +191,7 @@ export class ArgumentsManager {
                     continue;
                 }    
             }*/
-            for (let param of this.#parameters){
+            for (let param of allParams){
                 let res = param.parser.parse(args, argIndex);
                 if (res === true) {
                 } else if (typeof res == "number"){
@@ -180,7 +203,7 @@ export class ArgumentsManager {
             }
         }
 
-        for (let param of this.#parameters){
+        for (let param of allParams){
             let state = param.parser.getState();
             if (checkMissingNeededArgument && !param.optional && !state){
                 if (this.#missingArgumentBehavior.message){
@@ -206,7 +229,7 @@ export class ArgumentsManager {
 
     makeUsageMessage(programName){
         let result = programName ? programName + " " : "";
-        for (let p of this.#parameters){
+        for (let p of this.getAllParameters()){
             if (p.hidden) continue;
             result += p.optional ?
                 `[${p.parser.getUsageText(p.dest)}] ` : 
@@ -218,7 +241,7 @@ export class ArgumentsManager {
 
     makeHelp(programName){
         let result = "Usage : " + this.makeUsageMessage(programName) + "\n" + this.#abstract + "\n";
-        for (let param of this.#parameters){
+        for (let param of this.getAllParameters()){
             if (param.hidden) continue;
             result += "\t" + param.parser.getUsageText(param.dest) + "\t: " + (param.description ?? "(undocumented)") + "\n";
         }
