@@ -1,5 +1,5 @@
 import {basename} from 'path';
-import {Parser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
+import {AllArgumentsParser, Parser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
 
 function findPotentialNameInTriggers(sw){
     let dest;
@@ -94,9 +94,20 @@ export class ArgumentsManager {
             dest, 
             optional, 
             description: options.description
-        })
+        });
 
-        return this
+        return this;
+    }
+
+    addMultiParameter(dest, options = {}){
+        this.#parameters.allArgs.push({
+            parser: new AllArgumentsParser(),
+            dest, 
+            optional: true,
+            description: options.description
+        });
+
+        return this;
     }
 
     /**
