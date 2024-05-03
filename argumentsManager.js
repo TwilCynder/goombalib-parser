@@ -71,12 +71,12 @@ export class ArgumentsManager {
     /**
      * 
      * @param {string} dest 
-     * @param {{description?: string, default?: any}} options 
+     * @param {{description?: string, last?: any}} options 
      * @param {boolean} optional 
      */
     addParameter(dest, options = {}, optional = true){
         this.#parameters.push({
-            parser: new SingleArgumentParser(options.default),
+            parser: new SingleArgumentParser(options.last),
             dest, 
             optional, 
             description: options.description
