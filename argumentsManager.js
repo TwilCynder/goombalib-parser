@@ -1,5 +1,5 @@
 import {basename} from 'path';
-import {AllArgumentsParser, Parser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
+import {AllArgumentsParser, Parser, PropertiesParser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
 
 function findPotentialNameInTriggers(sw){
     let dest;
@@ -52,6 +52,7 @@ export class ArgumentsManager {
      *  option: ParsersList,
      *  switch: ParsersList,
      *  singleArg: ParsersList,
+     *  allProperties: ParsersList,
      *  allArgs: ParsersList
      * } }
      */
@@ -59,7 +60,8 @@ export class ArgumentsManager {
         option: [],
         switch: [],
         singleArg: [],
-        allArgs: []
+        allProperties: [],
+        allArgs: [],
     }
 
     #abstract = "";
@@ -158,6 +160,17 @@ export class ArgumentsManager {
         return this;
     }
 
+    enablePropertyArguments(dest = "properties", description){
+        this.#parameters.option.push({
+            parser: new PropertiesParser(),
+            dest, 
+            optional: true,
+            description, 
+        });
+
+        return this;
+    }
+
     enableHelpParameter(){
         this.#parameters.switch.push({
             parser: new (class extends Parser {
@@ -185,6 +198,7 @@ export class ArgumentsManager {
     getAllParameters(){
         return this.#parameters.switch
             .concat(this.#parameters.option)
+            .concat(this.#parameters.allProperties)
             .concat(this.#parameters.singleArg)
             .concat(this.#parameters.allArgs)
     }
