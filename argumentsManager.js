@@ -29,6 +29,16 @@ function findPotentialNameInTriggers(sw){
     return dest;
 }
 
+const transforms = {
+    number: (string) => {
+        try {
+            return parseInt(string);
+        } catch (err) {
+            throw "Expected a number";
+        }
+    }
+}
+
 export class MissingArgumentError extends Error {
     constructor(message){
         super(message);
@@ -87,7 +97,7 @@ export class ArgumentsManager {
     /**
      * 
      * @param {string} dest 
-     * @param {{description?: string, last?: any, default: string}} options 
+     * @param {{description?: string, last?: any, default: string, type?: string}} options 
      * @param {boolean} optional 
      */
     addParameter(dest, options = {}, optional = true){
@@ -95,6 +105,7 @@ export class ArgumentsManager {
             parser: new SingleArgumentParser(options.last, options.default),
             dest, 
             optional, 
+            transform: options.type ? transforms[options.type] : undefined,
             description: options.description
         });
 
@@ -139,7 +150,7 @@ export class ArgumentsManager {
     /**
      * 
      * @param {string | string[]} sw 
-     * @param {{dest?: string, description?: string, default?: any}} options 
+     * @param {{dest?: string, description?: string, default?: any, type?: string}} options 
      */
     addOption(sw, options = {}, optional = true){
         let dest;
@@ -154,6 +165,7 @@ export class ArgumentsManager {
             parser: new SingleOptionParser(sw, options.default),
             dest,
             optional,
+            transform: options.type ? transforms[options.type] : undefined,
             description: options.description
         });
 
@@ -240,7 +252,13 @@ export class ArgumentsManager {
                 if (this.#missingArgumentBehavior.throw_){
                     throw new MissingArgumentError(this.#missingArgumentBehavior.message ? this.#missingArgumentBehavior.message + " : " + param.parser.getUsageText(param.dest) : param.parser.getUsageText(param.dest));
                 }
-
+            }
+            if (param.transform){
+                try {
+                    state = param.transform(state);
+                } catch (err){
+                    console.error(`Error while parsing argument ${param.dest} : `, err);
+                }
             }
             result[param.dest] = state;
         }
