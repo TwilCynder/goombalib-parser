@@ -125,20 +125,20 @@ export class ArgumentsManager {
 
     /**
      * 
-     * @param {string | string[]} sw 
+     * @param {string | string[]} triggers 
      * @param {{dest?: string, description?: string}} options 
      */
-    addSwitch(sw, options = {}, optional = true){
+    addSwitch(triggers, options = {}, optional = true){
         let dest;
 
         if (options.dest){
             dest = options.dest;
         } else {
-            dest = findPotentialNameInTriggers(sw);
+            dest = findPotentialNameInTriggers(triggers);
         }
 
         this.#parameters.switch.push({
-            parser: new SingleSwitchParser(sw),
+            parser: new SingleSwitchParser(triggers),
             dest,
             optional,
             description: options.description
@@ -149,20 +149,20 @@ export class ArgumentsManager {
 
     /**
      * 
-     * @param {string | string[]} sw 
+     * @param {string | string[]} triggers 
      * @param {{dest?: string, description?: string, default?: any, type?: string}} options 
      */
-    addOption(sw, options = {}, optional = true){
+    addOption(triggers, options = {}, optional = true){
         let dest;
 
         if (options.dest){
             dest = options.dest;
         } else {
-            dest = findPotentialNameInTriggers(sw);
+            dest = findPotentialNameInTriggers(triggers);
         }
 
         this.#parameters.option.push({
-            parser: new SingleOptionParser(sw, options.default),
+            parser: new SingleOptionParser(triggers, options.default),
             dest,
             optional,
             transform: options.type ? transforms[options.type] : undefined,

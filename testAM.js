@@ -12,6 +12,7 @@ manager
     .setMissingArgumentBehavior("Missing mandatory argument", null, false)
     .enableHelpParameter()
     .enablePropertyArguments("props")
+    .parseProcessArguments()
 
 let result = manager.parseArguments(process.argv.slice(2));
 
