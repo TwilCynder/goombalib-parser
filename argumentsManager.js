@@ -42,8 +42,8 @@ const transforms = {
 export class MissingArgumentError extends Error {
 
     constructor(message, param){
-        this.param = param;
         super((message ? message + " : " : "") + param.parser.getUsageText(param.dest));
+        this.param = param;
         this.name = "MissingArgumentError";
     }
 
