@@ -40,9 +40,15 @@ const transforms = {
 }
 
 export class MissingArgumentError extends Error {
-    constructor(message){
-        super(message);
+
+    constructor(message, param){
+        this.param = param;
+        super((message ? message + " : " : "") + param.parser.getUsageText(param.dest));
         this.name = "MissingArgumentError";
+    }
+
+    getMissingArgumentUsageText(){
+        return this.param.parser.getUsageText(this.param.dest);
     }
 }
 
@@ -76,7 +82,7 @@ export class ArgumentsManager {
 
     #abstract = "";
 
-    #missingArgumentBehavior = {throw_: true};
+    #missingArgumentBehavior = {throw_: true, message: null, errorCode: 0};
 
     setAbstract(abstract){
         this.#abstract = abstract;
@@ -250,7 +256,7 @@ export class ArgumentsManager {
                     process.exit(this.#missingArgumentBehavior.errorCode);
                 }
                 if (this.#missingArgumentBehavior.throw_){
-                    throw new MissingArgumentError(this.#missingArgumentBehavior.message ? this.#missingArgumentBehavior.message + " : " + param.parser.getUsageText(param.dest) : param.parser.getUsageText(param.dest));
+                    throw new MissingArgumentError(this.#missingArgumentBehavior.message, param);
                 }
             }
             if (param.transform){
