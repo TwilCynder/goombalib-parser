@@ -10,7 +10,7 @@ manager
     .setAbstract("A test program")
     .addMultiParameter("files")
     .setMissingArgumentBehavior("Missing mandatory argument", null, false)
-    .enableHelpParameter()
+    .enableHelpParameter(false)
     .enablePropertyArguments("props")
     .parseProcessArguments()
 

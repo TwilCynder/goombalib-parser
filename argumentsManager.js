@@ -199,6 +199,7 @@ export class ArgumentsManager {
                 constructor(argumentsManager){
                     super();
                     this.#am = argumentsManager;
+                    this._state = false;
                 }
 
                 parse(args, i){
@@ -208,11 +209,17 @@ export class ArgumentsManager {
                         if (exit){
                             process.exit(0);
                         }
+
+                        this._state = true;
+                        return true;
                     }
                 }
+
+
             })(this),
             hidden: true,
-            optional: true
+            optional: true,
+            dest: "help"
         })
 
         return this;
