@@ -120,9 +120,13 @@ will produce the following result (content of the `props` variable)
 
 Note that if you do not call this method, "property arguments" will just be treated as [basic arguments](#addparameterdest-options---optional--true)
 
-##### .enableHelpParameter(exit) and .setAbstract(abstract)
-If `enableHelpParameter` is called, a help message will be displayed when arguments are parsed and either `-h` or `--help` were specified ; the program will also exit with code 0 if the "exit" parameter is true.  
+##### .enableHelpParameter(noEffect) and .setAbstract(abstract)
+Adds a special switch parser that detects either `-h` or `--help`.  
+- If "noEffect" is `false`, when `-h` or `--help` are parsed it will display a help message ; the program will then exit with code 0.
+- If it is `true`, the parser will simply behave like a normal switch parser, with `"help"` as the destination, allowing you to control more accurately what happens when the user requested help.  
+
 This help message is composed of 
+- A summary of all the parameters in the form of a "usage" string ("Usage : node program.js ...")
 - Optionnaly, a short text configured with `setAbstract`
 - A list of the parsers, with their description.  
 
