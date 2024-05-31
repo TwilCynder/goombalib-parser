@@ -120,17 +120,18 @@ will produce the following result (content of the `props` variable)
 
 Note that if you do not call this method, "property arguments" will just be treated as [basic arguments](#addparameterdest-options---optional--true)
 
-##### .enableHelpParameter() and .setAbstract(abstract)
-`enableHelpParameter` displays a help message when arguments are parsed and either `-h` or `--help` were specified.  
+##### .enableHelpParameter(exit) and .setAbstract(abstract)
+If `enableHelpParameter` is called, a help message will be displayed when arguments are parsed and either `-h` or `--help` were specified ; the program will also exit with code 0 if the "exit" parameter is true.  
 This help message is composed of 
 - Optionnaly, a short text configured with `setAbstract`
 - A list of the parsers, with their description.  
 
 ##### .setMissingArgumentBehavior(message, errorCode, throw_ = true)
 Configures the behavior of the parsing methods in case a mandatory argument is missing.  
-- "message" (string) will set the text message displayed or raised. Note that this message will be followed by " : " and the destination name of the parameter that's missing.  
+- "message" (string) will set the text message displayed or raised, depending on the next arguments. Note that this message will be followed by " : " and the destination name of the parameter that's missing.  
 - "errorCode" (number), if specified, will make the program exit with the given error code. 
 - "throw" (boolean) sets whether an exception is raised if an argument is missing. Pointless if "errorCode" is specified, as the program will exit before anything can be raised.  
+- "log" (boolean) sets whether the "message" is logged to stderr on if an argument is missing
 
 #### Parse
 

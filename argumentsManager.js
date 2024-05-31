@@ -192,7 +192,7 @@ export class ArgumentsManager {
         return this;
     }
 
-    enableHelpParameter(){
+    enableHelpParameter(exit = true){
         this.#parameters.switch.push({
             parser: new (class extends Parser {
                 #am;
@@ -205,7 +205,9 @@ export class ArgumentsManager {
                     let arg = args[i];
                     if (arg == "-h" || arg == "--help"){
                         console.log(this.#am.makeHelp(basename(process.argv[0]) + " " + basename(process.argv[1])))
-                        process.exit(0);
+                        if (exit){
+                            process.exit(0);
+                        }
                     }
                 }
             })(this),
