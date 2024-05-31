@@ -82,7 +82,7 @@ export class ArgumentsManager {
 
     #abstract = "";
 
-    #missingArgumentBehavior = {throw_: true, message: null, errorCode: 0};
+    #missingArgumentBehavior = {throw_: true, message: null, errorCode: 0, log : false};
 
     setAbstract(abstract){
         this.#abstract = abstract;
@@ -90,11 +90,14 @@ export class ArgumentsManager {
         return this;
     }
 
-    setMissingArgumentBehavior(message, errorCode, throw_ = true){
+    
+    //next version : séparer le message du reste
+    setMissingArgumentBehavior(message, errorCode, throw_ = true, log){
         this.#missingArgumentBehavior = {
             message,
             errorCode,
-            throw_
+            throw_,
+            log: log ?? !!message
         }
 
         return this;
@@ -249,7 +252,7 @@ export class ArgumentsManager {
         for (let param of allParams){
             let state = param.parser.getState();
             if (checkMissingNeededArgument && !param.optional && !state){
-                if (this.#missingArgumentBehavior.message){
+                if (this.#missingArgumentBehavior.log){
                     console.error(this.#missingArgumentBehavior.message, ":", param.parser.getUsageText(param.dest));
                 }
                 if (this.#missingArgumentBehavior.errorCode){
