@@ -1,4 +1,19 @@
 import { ArgumentsManager } from "./argumentsManager.js";
+import { Parser, TriggerParser } from "./parseArguments.js";
+
+class CountParser extends TriggerParser {
+    constructor(trigger){
+        super(trigger)
+        this._state = 0;
+    }
+
+    parse(args, i){
+        if (this.detectTrigger(args[i])){
+            this._state++;
+            return true;
+        }
+    }
+}
 
 let manager = new ArgumentsManager();
 
@@ -9,12 +24,12 @@ manager
     .addOption(["-n", "--number"], {description: "Needs a number", type: "number"})
     .setAbstract("A test program")
     .addMultiParameter("files")
+    .addCustomParser(new CountParser("-c"), "count", {description: "Counts how many -c in the args"}, true)
     .setMissingArgumentBehavior("Missing mandatory argument", null, false)
     .enableHelpParameter(false)
     .enablePropertyArguments("props")
-    .parseProcessArguments()
 
-let result = manager.parseArguments(process.argv.slice(2));
+let result = manager.parseProcessArguments();
 
 //console.log(manager.makeHelp("test-parser"));
 

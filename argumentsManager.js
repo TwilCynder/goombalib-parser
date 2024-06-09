@@ -67,6 +67,7 @@ export class ArgumentsManager {
      * @type { {
      *  option: ParsersList,
      *  switch: ParsersList,
+     *  custom: ParsersList,
      *  singleArg: ParsersList,
      *  allProperties: ParsersList,
      *  allArgs: ParsersList
@@ -75,6 +76,7 @@ export class ArgumentsManager {
     #parameters = {
         option: [],
         switch: [],
+        custom: [],
         singleArg: [],
         allProperties: [],
         allArgs: [],
@@ -181,6 +183,17 @@ export class ArgumentsManager {
         return this;
     }
 
+    addCustomParser(parser, dest, options = {}, optional = true){
+        this.#parameters.custom.push({
+            parser,
+            dest,
+            optional,
+            description: options.description
+        });
+
+        return this;
+    }
+
     enablePropertyArguments(dest = "properties", description){
         this.#parameters.option.push({
             parser: new PropertiesParser(),
@@ -230,6 +243,7 @@ export class ArgumentsManager {
     getAllParameters(){
         return this.#parameters.switch
             .concat(this.#parameters.option)
+            .concat(this.#parameters.custom)
             .concat(this.#parameters.allProperties)
             .concat(this.#parameters.singleArg)
             .concat(this.#parameters.allArgs)
@@ -248,6 +262,7 @@ export class ArgumentsManager {
                     continue;
                 }    
             }*/
+            console.log("PARSING", argIndex);
             for (let param of allParams){
                 let res = param.parser.parse(args, argIndex);
                 if (res === true) {
