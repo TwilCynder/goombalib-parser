@@ -367,3 +367,7 @@ export function parseArguments(args, ...parsers){
         return [];
     }
 }
+
+export function parseProcessArguments(...parsers){
+    return parseArguments(process.argv.slice(2))
+}
