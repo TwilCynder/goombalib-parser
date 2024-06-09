@@ -157,7 +157,7 @@ export class SingleArgumentParser extends Parser {
     }
 }
 
-class TriggerParser_ extends Parser {
+export class TriggerParser extends Parser {
     #trigger;
 
     /**
@@ -206,7 +206,7 @@ class TriggerParser_ extends Parser {
 /**
  * Parser for parseArguments that looks for a specific argument, and ultimately returns whether it was found or not (ideal for switches)
  */
-export class SingleSwitchParser extends TriggerParser_ {
+export class SingleSwitchParser extends TriggerParser {
     /**
      * @param {string | string[]} trigger The argument, or a list of arguments, to look for
      */
@@ -226,7 +226,7 @@ export class SingleSwitchParser extends TriggerParser_ {
 /**
  * Parser for parseArguments that looks for a specific argument (generally an option starting with a -) and saves the next argument (ideal for arguments like "-f filename")
  */
-export class SingleOptionParser extends TriggerParser_ {
+export class SingleOptionParser extends TriggerParser {
 
     /**
      * @param {string} trigger The argument to look for
