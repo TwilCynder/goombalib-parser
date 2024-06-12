@@ -219,10 +219,8 @@ export class ArgumentsManager {
                     let arg = args[i];
                     if (arg == "-h" || arg == "--help"){
                         if (!noEffect){
-                            console.log(this.#am.makeHelp(basename(process.argv[0]) + " " + basename(process.argv[1])))
-                            if (exit){
-                                process.exit(0);
-                            }
+                            console.log(this.#am.getHelp(basename(process.argv[0]) + " " + basename(process.argv[1])))
+                            process.exit(0);
                         }
 
                         this._state = true;
