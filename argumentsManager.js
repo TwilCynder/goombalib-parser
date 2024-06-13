@@ -39,16 +39,21 @@ const transforms = {
     }
 }
 
+function missingParamsUsageText(params){
+    return params.reduce((str, param) => (str + param.parser.getUsageText(param.dest) + ", "), "").slice(0, -2)
+}
+
 export class MissingArgumentError extends Error {
 
-    constructor(message, param){
-        super((message ? message + " : " : "") + param.parser.getUsageText(param.dest));
-        this.param = param;
+    constructor(message, missingParams, argumentsManager){
+        super((message ? message + " : " : "") + missingParamsUsageText(missingParams));
+        this.missingParams = param;
         this.name = "MissingArgumentError";
+        this.argumentsManager = argumentsManager;
     }
 
     getMissingArgumentUsageText(){
-        return this.param.parser.getUsageText(this.param.dest);
+        return missingParamsUsageText(this.missingParams)
     }
 }
 
@@ -92,9 +97,9 @@ export class ArgumentsManager {
         return this;
     }
 
-    
     //next version : séparer le message du reste
     setMissingArgumentBehavior(message, errorCode, throw_ = true, log){
+
         this.#missingArgumentBehavior = {
             message,
             errorCode,
@@ -273,18 +278,11 @@ export class ArgumentsManager {
             }
         }
 
+        let missingArguments = [];
         for (let param of allParams){
             let state = param.parser.getState();
             if (checkMissingNeededArgument && !param.optional && !state){
-                if (this.#missingArgumentBehavior.log){
-                    console.error(this.#missingArgumentBehavior.message, ":", param.parser.getUsageText(param.dest));
-                }
-                if (this.#missingArgumentBehavior.errorCode){
-                    process.exit(this.#missingArgumentBehavior.errorCode);
-                }
-                if (this.#missingArgumentBehavior.throw_){
-                    throw new MissingArgumentError(this.#missingArgumentBehavior.message, param);
-                }
+                missingArguments.push(param);
             }
             if (param.transform){
                 try {
@@ -296,6 +294,24 @@ export class ArgumentsManager {
             result[param.dest] = state;
         }
 
+        if (missingArguments.length > 0){
+            if (this.#missingArgumentBehavior.log){
+
+                console.log(missingArguments.reduce((str, param) => (str + param.parser.getUsageText(param.dest) + ", "), ""))
+
+                console.error(this.#missingArgumentBehavior.message, ":", 
+                    missingParamsUsageText(missingArguments));
+
+                console.error("Usage : node", this.makeUsageMessage())
+            }
+            if (this.#missingArgumentBehavior.errorCode){
+                process.exit(this.#missingArgumentBehavior.errorCode);
+            }
+            if (this.#missingArgumentBehavior.throw_){
+                throw new MissingArgumentError(this.#missingArgumentBehavior.message, missingArguments);
+            }
+        }
+
         return result;
     }
 
@@ -303,7 +319,7 @@ export class ArgumentsManager {
         return this.parseArguments(process.argv.slice(2));
     }
 
-    makeUsageMessage(programName){
+    makeUsageMessage(programName = process.argv[1].split('\\').pop().split('/').pop()){
         let result = programName ? programName + " " : "";
         for (let p of this.getAllParameters()){
             if (p.hidden) continue;

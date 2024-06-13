@@ -1,5 +1,5 @@
 import { ArgumentsManager } from "./argumentsManager.js";
-import { Parser, TriggerParser } from "./parseArguments.js";
+import { TriggerParser } from "./parseArguments.js";
 
 class CountParser extends TriggerParser {
     constructor(trigger){
@@ -19,13 +19,13 @@ let manager = new ArgumentsManager();
 
 manager
     .addParameter("param", {description: "A parameter", last: false}, false)
-    .addSwitch("-s", {dest: "switch", description: "A Switch (mandatory)"}, false)
-    .addOption(["-o", "--option"], {description: "An Option"})
+    .addSwitch("-s", {dest: "switch", description: "A Switch (mandatory)"})
+    .addOption(["-o", "--option"], {description: "An Option"}, false)
     .addOption(["-n", "--number"], {description: "Needs a number", type: "number"})
     .setAbstract("A test program")
     .addMultiParameter("files")
     .addCustomParser(new CountParser("-c"), "count", {description: "Counts how many -c in the args"}, true)
-    .setMissingArgumentBehavior("Missing mandatory argument", null, false)
+    .setMissingArgumentBehavior("Missing mandatory argument(s)", null, false)
     .enableHelpParameter(false)
     .enablePropertyArguments("props")
 
