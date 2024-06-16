@@ -15,6 +15,12 @@ class CountParser extends TriggerParser {
     }
 }
 
+function config(am){
+    am
+        .addOption(["-O", "--option2"], {description: "An Option"})
+        .addOption(["-N", "--number2"], {description: "Needs a number", type: "number"})
+}
+
 let manager = new ArgumentsManager();
 
 manager
@@ -25,6 +31,7 @@ manager
     .setAbstract("A test program")
     .addMultiParameter("files")
     .addCustomParser(new CountParser("-c"), "count", {description: "Counts how many -c in the args"}, true)
+    .apply(config)
     .setMissingArgumentBehavior("Missing mandatory argument(s)", null, false)
     .enableHelpParameter(false)
     .enablePropertyArguments("props")

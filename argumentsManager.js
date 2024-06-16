@@ -243,6 +243,16 @@ export class ArgumentsManager {
         return this;
     }
 
+    /**
+     * 
+     * @param {(mgr: ArgumentsManager) => void} f 
+     */
+    apply(f){
+        f(this);
+
+        return this;
+    }
+
     getAllParameters(){
         return this.#parameters.switch
             .concat(this.#parameters.option)

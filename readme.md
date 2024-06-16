@@ -58,6 +58,8 @@ let {param1, param2} = new ArgumentsManager()
 
 #### Configure
 
+All these methods return the ArgumentsManager instance, which means you can chain them (`new ArgumentsManager().addOption().addParameter()...`)
+
 ##### Universal options
 
 All the "add" methods take an "option" parameter, used to fine-tune the behavior of the added parser. There are some options that work on all parsers; only the options that are specific to each parser will be listed below.  
@@ -136,6 +138,37 @@ Configures the behavior of the parsing methods in case a mandatory argument is m
 - "errorCode" (number), if specified, will make the program exit with the given error code. 
 - "throw" (boolean) sets whether an exception is raised if an argument is missing. Pointless if "errorCode" is specified, as the program will exit before anything can be raised.  
 - "log" (boolean) sets whether the "message" is logged to stderr on if an argument is missing
+
+#### .apply(func)
+Calls "func" on the ArgumentsManager and returns it. The main purpose of this is that if you want to reuse the same parameters across different distances, you can write a function taking an ArgumentsManager and calling the above methods on it, and then use .apply to call this function as part of the methods chain.
+
+```js
+function config(am){
+    am.addOption(    .addOption(["-o", "--output"], {
+        description: "A file to save the output to. If not specified, the output will be sent to the std output."
+    })
+    .addSwitch(["-l", "--log"], {
+        description: "Use to log the processed data (in a nice and pretty format) to the std output, the actual output is emitted"
+    }))
+}
+
+//Without .apply
+
+let manager = new ArgumentsManager();
+
+config(manager)
+
+manager
+    .addParameter(...)
+    .parseProgramArguments();
+
+//with .apply
+
+new ArgumentsManager()
+    .apply(config)
+    .addParameter(...)
+    .parseProgramArguments();
+```
 
 #### Parse
 
