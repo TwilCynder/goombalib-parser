@@ -275,7 +275,6 @@ export class ArgumentsManager {
                     continue;
                 }    
             }*/
-            console.log("PARSING", argIndex);
             for (let param of allParams){
                 let res = param.parser.parse(args, argIndex);
                 if (res === true) {
