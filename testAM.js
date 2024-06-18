@@ -25,7 +25,7 @@ let manager = new ArgumentsManager();
 
 manager
     .addParameter("param", {description: "A parameter", last: false}, false)
-    .addSwitch("-s", {dest: "switch", description: "A Switch (mandatory)"})
+    .addSwitch("-s", {dest: "switch", description: "A Switch (mandatory)"}, false)
     .addOption(["-o", "--option"], {description: "An Option"}, false)
     .addOption(["-n", "--number"], {description: "Needs a number", type: "number"})
     .setAbstract("A test program")

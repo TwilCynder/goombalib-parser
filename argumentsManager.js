@@ -47,7 +47,7 @@ export class MissingArgumentError extends Error {
 
     constructor(message, missingParams, argumentsManager){
         super((message ? message + " : " : "") + missingParamsUsageText(missingParams));
-        this.missingParams = param;
+        this.missingParams = missingParams;
         this.name = "MissingArgumentError";
         this.argumentsManager = argumentsManager;
     }
@@ -332,6 +332,7 @@ export class ArgumentsManager {
         let result = programName ? programName + " " : "";
         for (let p of this.getAllParameters()){
             if (p.hidden) continue;
+            console.log(p);
             result += p.optional ?
                 `[${p.parser.getUsageText(p.dest)}] ` : 
                 p.parser.getUsageText(p.dest) + " ";
