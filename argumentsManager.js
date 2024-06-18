@@ -332,7 +332,6 @@ export class ArgumentsManager {
         let result = programName ? programName + " " : "";
         for (let p of this.getAllParameters()){
             if (p.hidden) continue;
-            console.log(p);
             result += p.optional ?
                 `[${p.parser.getUsageText(p.dest)}] ` : 
                 p.parser.getUsageText(p.dest) + " ";
