@@ -28,6 +28,8 @@ manager
     .addSwitch("-s", {dest: "switch", description: "A Switch (mandatory)"}, false)
     .addOption(["-o", "--option"], {description: "An Option"}, false)
     .addOption(["-n", "--number"], {description: "Needs a number", type: "number"})
+    .addMultiOption("-m", {description: "Option you can use multiple times"})
+    .addMultiOption("--mn", {description: "A multi-option number", type: "number"})
     .setAbstract("A test program")
     .addMultiParameter("files")
     .addCustomParser(new CountParser("-c"), "count", {description: "Counts how many -c in the args"}, true)
@@ -42,4 +44,4 @@ let result = manager.parseProcessArguments();
 
 console.log(result);
 
-//node testAM.js -o oui -n 12 -s *
+//node testAM.js -m aa -o oui -m bb -n 12 -s * -m cc

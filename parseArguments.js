@@ -229,7 +229,7 @@ export class SingleSwitchParser extends TriggerParser {
 export class SingleOptionParser extends TriggerParser {
 
     /**
-     * @param {string} trigger The argument to look for
+     * @param {string | string[]} trigger The argument to look for
      */
     constructor(trigger, default_value = null){
         super(trigger);
@@ -247,6 +247,27 @@ export class SingleOptionParser extends TriggerParser {
         return super.getUsageText() + ` <${name}>`;
     }
 
+}
+
+export class MultiOptionParser extends TriggerParser {
+    /**
+     * @param {string | string[]} trigger The argument to look for
+     */
+    constructor(trigger){
+        super(trigger)
+        this._state = [];
+    }
+
+    parse(args, i){
+        if (this.detectTrigger(args[i])){
+            this._state.push(this.getArg(args, i + 1));
+            return 1;
+        }
+    }
+
+    getUsageText(name){
+        return "(" + super.getUsageText() + ` <${name}>` + ")...";
+    }
 }
 
 export class SinglePropertyParser extends Parser {

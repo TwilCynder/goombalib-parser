@@ -100,6 +100,15 @@ The destination name for this parser can be specified in the options (as "dest")
 
 If "optional" is false, parsing methods will raise an error if none of the triggers were seen.
 
+##### .addMultiOption(triggers, options = {}, optional = true)
+Adds an **repeatable option** parser, which works just like the [option parser](#addoptiontriggers-options---optional--true), except it returns an array, saving a new element each time the trigger is found.  
+
+To clarify : this is a parser that always returns an array. Each time the parsed argument is one of the triggers you specified as the first argument (either a string or an array of strings), the next argument is added to the array. 
+
+Just
+
+This parser does not take a "default" option, and simply returns an empty array if the trigger was never seen.  
+
 ##### .enablePropertyArguments(dest = "properties", description)
 Enables property arguments parsing. This means that all "property arguments", which are all the arguments of form `name=value` will be collected in a single object / dictionnary.  
 

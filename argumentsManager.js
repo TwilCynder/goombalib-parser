@@ -1,5 +1,5 @@
 import {basename} from 'path';
-import {AllArgumentsParser, Parser, PropertiesParser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
+import {AllArgumentsParser, MultiOptionParser, Parser, PropertiesParser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
 
 function findPotentialNameInTriggers(sw){
     let dest;
@@ -188,6 +188,31 @@ export class ArgumentsManager {
         return this;
     }
 
+    /**
+     * 
+     * @param {string | string[]} triggers 
+     * @param {{dest?: string, description?: string, default?: any, type?: string}} options 
+     */
+    addMultiOption(triggers, options = {}){
+        let dest;
+
+        if (options.dest){
+            dest = options.dest;
+        } else {
+            dest = findPotentialNameInTriggers(triggers);
+        }
+
+        this.#parameters.option.push({
+            parser: new MultiOptionParser(triggers),
+            dest,
+            optional: true,
+            transform: options.type ? transforms[options.type] : undefined,
+            description: options.description
+        });
+
+        return this;
+    }
+
     addCustomParser(parser, dest, options = {}, optional = true){
         this.#parameters.custom.push({
             parser,
@@ -195,6 +220,8 @@ export class ArgumentsManager {
             optional,
             description: options.description
         });
+
+
 
         return this;
     }
@@ -295,7 +322,11 @@ export class ArgumentsManager {
             }
             if (param.transform){
                 try {
-                    state = param.transform(state);
+                    if (state instanceof Array){
+                        state = state.map(elem => param.transform(elem))
+                    } else {
+                        state = param.transform(state);
+                    }                    
                 } catch (err){
                     console.error(`Error while parsing argument ${param.dest} : `, err);
                 }
