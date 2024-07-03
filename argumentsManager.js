@@ -32,7 +32,7 @@ function findPotentialNameInTriggers(sw){
 const transforms = {
     number: (string) => {
         try {
-            return parseInt(string);
+            return !!string ? parseInt(string) : string;
         } catch (err) {
             throw "Expected a number";
         }
