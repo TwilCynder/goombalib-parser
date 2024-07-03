@@ -64,8 +64,11 @@ All these methods return the ArgumentsManager instance, which means you can chai
 
 All the "add" methods take an "option" parameter, used to fine-tune the behavior of the added parser. There are some options that work on all parsers; only the options that are specific to each parser will be listed below.  
 
-- "default" : specifies the default value retrurned by the parser is it did not catch anything (and was optional)
-- "description" (string) : gives a description to the parser, used by the manual feature (see [the --help/-h parameter](#enablehelpparameter))
+- **"default"** : specifies the default value retrurned by the parser is it did not catch anything (and was optional)
+- **"description"** (string) : gives a description to the parser, used by the manual feature (see [the --help/-h parameter](#enablehelpparameter))
+
+An additional common (as in, compatible with multiple parsers but not all) option is **"transform"** : this option allows you to convert the value saved by a parser before it is returned. 
+- If its value is "number", the value will be converted to an integer (using parseInt)
 
 ##### .addParameter(dest, options = {}, optional = true)
 Adds a **parameter** parser, that will simply take the value of an basic argument. A "basic argument" is defined as any argument that did not match any option or switch parser (see below) and is not a property (also see below)
@@ -77,12 +80,16 @@ Options can be :
 
 If "optional" is false, parsing methods will raise an error if this parser did not have anything to save.
 
+This method supports the "transform" option (see [Universal Options](#universal-options))
+
 ##### .addMultiParameter(dest, options = {})
 Works like the parameter parser, except instead of saving a single argument it will save all basic arguments that aren't a switch, option or property.
 
 As a single argument cannot be saved by multiple parsers, any parameter parsers added after this method is called will be unable to parse anything.  
 
 This parser does not take a "default" option, and simply returns an empty array if no arguments matched the conditions.  
+
+This method supports the "transform" option (see [Universal Options](#universal-options)) ; keep in mind that it will work in a slightly special way, as the conversion will not be applied to the value of this parser directly (which is an array), but to all of its elements.
 
 ##### .addSwitch(triggers, options = {}, optional = true)
 Adds a **switch** parser. This parser takes one or many "triggers", and ignores anything that is not exactly one of these triggers. Is one of the triggers is ever encountered, the value returned by this parser will be true ; if not, it will be false.  
@@ -100,14 +107,16 @@ The destination name for this parser can be specified in the options (as "dest")
 
 If "optional" is false, parsing methods will raise an error if none of the triggers were seen.
 
+This method supports the "transform" option (see [Universal Options](#universal-options))
+
 ##### .addMultiOption(triggers, options = {}, optional = true)
 Adds an **repeatable option** parser, which works just like the [option parser](#addoptiontriggers-options---optional--true), except it returns an array, saving a new element each time the trigger is found.  
 
 To clarify : this is a parser that always returns an array. Each time the parsed argument is one of the triggers you specified as the first argument (either a string or an array of strings), the next argument is added to the array. 
 
-Just
-
 This parser does not take a "default" option, and simply returns an empty array if the trigger was never seen.  
+
+This method supports the "transform" option (see [Universal Options](#universal-options)) ; keep in mind that it will work in a slightly special way, as the conversion will not be applied to the value of this parser directly (which is an array), but to all of its elements.
 
 ##### .enablePropertyArguments(dest = "properties", description)
 Enables property arguments parsing. This means that all "property arguments", which are all the arguments of form `name=value` will be collected in a single object / dictionnary.  

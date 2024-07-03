@@ -132,6 +132,7 @@ export class ArgumentsManager {
         this.#parameters.allArgs.push({
             parser: new AllArgumentsParser(),
             dest, 
+            transform: options.type ? transforms[options.type] : undefined,
             optional: true,
             description: options.description
         });
