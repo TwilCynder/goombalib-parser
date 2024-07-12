@@ -74,7 +74,7 @@ An additional common (as in, compatible with multiple parsers but not all) optio
 Adds a **parameter** parser, that will simply take the value of an basic argument. A "basic argument" is defined as any argument that did not match any option or switch parser (see below) and is not a property (also see below)
 The first argument is the destination name.  
 Options can be : 
-- "last" (boolean) : if false, this parser will take the first basic argument and then stop parsing anything. If true, this parser will take every argument and save the last. This means that any parameter parser added after this one will be unable to read anything, as a single argument cannot be saved by multiple parser. 
+- "last" (boolean) : if false, this parser will take the first basic argument and then stop parsing anything. If true, this parser will take every argument and save the last. This means that any parameter parser added after this one will be unable to read anything, as a single argument cannot be saved by multiple parsers. 
 - type (string) : 
   - "number" : value will be converted to a number (`NaN` if not convertible).
 

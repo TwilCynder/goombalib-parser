@@ -270,6 +270,74 @@ export class MultiOptionParser extends TriggerParser {
     }
 }
 
+export class CompositeOptionParser extends TriggerParser {
+    #length;
+    #optionsNames;
+
+    /**
+     * @param {string | string[]} trigger The argument to look for
+     * @param {number} length 
+     * @param {string[]} optionsNames
+     */
+    constructor(trigger, length, optionsNames = null){
+        super(trigger);
+        this._state = [];
+        this.#length = length;
+        this.#optionsNames = optionsNames;
+    }
+    
+    /**
+     * 
+     * @param {string[]} args 
+     * @param {number} i 
+     */
+    parse(args, i){
+        if (this.detectTrigger(args[i])){
+            this._state = args.slice(i + 1, i + this.#length + 1);
+            return this.#length;
+        }
+    }
+
+    getUsageText(name){
+        let names = this.#optionsNames ?? Array(this.#length).fill(null).map((_, i) => name + "" + i);
+        return super.getUsageText() + " " + names.map(name => `<${name}> `).join(" ");
+    }
+}
+
+export class MultiCompositeOptionParser extends TriggerParser {
+    #length;
+    #optionsNames;
+
+    /**
+     * @param {string | string[]} trigger The argument to look for
+     * @param {number} length 
+     * @param {string[]} optionsNames
+     */
+    constructor(trigger, length, optionsNames = null){
+        super(trigger);
+        this._state = [];
+        this.#length = length;
+        this.#optionsNames = optionsNames;
+    }
+
+    /**
+     * 
+     * @param {string[]} args 
+     * @param {number} i 
+     */
+    parse(args, i){
+        if (this.detectTrigger(args[i])){
+            this._state = this._state.push(args.slice(i + 1, i + this.#length + 1));
+            return this.#length;
+        }
+    }
+
+    getUsageText(name){
+        let names = this.#optionsNames ?? Array(this.#length).fill(null).map((_, i) => name + "" + i);
+        return "(" + super.getUsageText() + " " + names.map(name => `<${name}> `).join(" ") + ")...";
+    }
+}
+
 export class SinglePropertyParser extends Parser {
     #propName;
 

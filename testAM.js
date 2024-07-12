@@ -30,6 +30,7 @@ manager
     .addOption(["-n", "--number"], {description: "Needs a number", type: "number"})
     .addMultiOption("-m", {description: "Option you can use multiple times"})
     .addMultiOption("--mn", {description: "A multi-option number", type: "number"})
+    .addOption(["-p", "--composite"], {description: "An option composed of two separate arguments", length: 3, optionsNames: ["opt1", "opt2", "opt3"]})
     .setAbstract("A test program")
     .addMultiParameter("files")
     .addCustomParser(new CountParser("-c"), "count", {description: "Counts how many -c in the args"}, true)
@@ -44,4 +45,4 @@ let result = manager.parseProcessArguments();
 
 console.log(result);
 
-//node testAM.js -m aa -o oui -m bb -n 12 -s * -m cc
+//node testAM.js -m aa -p A B C -o oui -m bb -n 12 -s * -m cc

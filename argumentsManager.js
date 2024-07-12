@@ -1,5 +1,5 @@
 import {basename} from 'path';
-import {AllArgumentsParser, MultiOptionParser, Parser, PropertiesParser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
+import {AllArgumentsParser, CompositeOptionParser, MultiOptionParser, Parser, PropertiesParser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
 
 function findPotentialNameInTriggers(sw){
     let dest;
@@ -167,7 +167,7 @@ export class ArgumentsManager {
     /**
      * 
      * @param {string | string[]} triggers 
-     * @param {{dest?: string, description?: string, default?: any, type?: string}} options 
+     * @param {{dest?: string, description?: string, default?: any, type?: string, length: number, optionsNames: string[]}} options 
      */
     addOption(triggers, options = {}, optional = true){
         let dest;
@@ -179,7 +179,7 @@ export class ArgumentsManager {
         }
 
         this.#parameters.option.push({
-            parser: new SingleOptionParser(triggers, options.default),
+            parser: options.length > 1 ? new CompositeOptionParser(triggers, options.length, options.optionsNames) : new SingleOptionParser(triggers, options.default),
             dest,
             optional,
             transform: options.type ? transforms[options.type] : undefined,
@@ -192,7 +192,7 @@ export class ArgumentsManager {
     /**
      * 
      * @param {string | string[]} triggers 
-     * @param {{dest?: string, description?: string, default?: any, type?: string}} options 
+     * @param {{dest?: string, description?: string, default?: any, type?: string, length: number, optionsNames: string[]}} options 
      */
     addMultiOption(triggers, options = {}){
         let dest;
@@ -204,7 +204,7 @@ export class ArgumentsManager {
         }
 
         this.#parameters.option.push({
-            parser: new MultiOptionParser(triggers),
+            parser: options.length > 1 ? new MultiOptionParser(triggers, options.length, options.optionsNames) : new MultiOptionParser(triggers),
             dest,
             optional: true,
             transform: options.type ? transforms[options.type] : undefined,
