@@ -73,6 +73,7 @@ An additional common (as in, compatible with multiple parsers but not all) optio
 ##### .addParameter(dest, options = {}, optional = true)
 Adds a **parameter** parser, that will simply take the value of an basic argument. A "basic argument" is defined as any argument that did not match any option or switch parser (see below) and is not a property (also see below)
 The first argument is the destination name.  
+
 Options can be : 
 - "last" (boolean) : if false, this parser will take the first basic argument and then stop parsing anything. If true, this parser will take every argument and save the last. This means that any parameter parser added after this one will be unable to read anything, as a single argument cannot be saved by multiple parsers. 
 - type (string) : 
@@ -105,6 +106,9 @@ The "triggers" parameter can either be a string or an array of strings.
 
 The destination name for this parser can be specified in the options (as "dest"), but if any of the triggers starts with "--", the rest of the trigger (i.e. the trigger without the initial "--" will be used as the destination name).
 
+Options can be : 
+- length : if above 1, this parser will save this amount of arguments after the trigger, and return them as an array
+
 If "optional" is false, parsing methods will raise an error if none of the triggers were seen.
 
 This method supports the "transform" option (see [Universal Options](#universal-options))
@@ -115,6 +119,9 @@ Adds an **repeatable option** parser, which works just like the [option parser](
 To clarify : this is a parser that always returns an array. Each time the parsed argument is one of the triggers you specified as the first argument (either a string or an array of strings), the next argument is added to the array. 
 
 This parser does not take a "default" option, and simply returns an empty array if the trigger was never seen.  
+
+Options can be : 
+- length : if above 1, this parser will save this amount of arguments after each occurence of the trigger, and return an array of arrays
 
 This method supports the "transform" option (see [Universal Options](#universal-options)) ; keep in mind that it will work in a slightly special way, as the conversion will not be applied to the value of this parser directly (which is an array), but to all of its elements.
 
