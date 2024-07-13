@@ -1,5 +1,5 @@
 import {basename} from 'path';
-import {AllArgumentsParser, CompositeOptionParser, MultiOptionParser, Parser, PropertiesParser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
+import {AllArgumentsParser, CompositeOptionParser, MultiCompositeOptionParser, MultiOptionParser, Parser, PropertiesParser, SingleArgumentParser, SingleOptionParser, SingleSwitchParser} from "./parseArguments.js";
 
 function findPotentialNameInTriggers(sw){
     let dest;
@@ -204,7 +204,7 @@ export class ArgumentsManager {
         }
 
         this.#parameters.option.push({
-            parser: options.length > 1 ? new MultiOptionParser(triggers, options.length, options.optionsNames) : new MultiOptionParser(triggers),
+            parser: options.length > 1 ? new MultiCompositeOptionParser(triggers, options.length, options.optionsNames) : new MultiOptionParser(triggers),
             dest,
             optional: true,
             transform: options.type ? transforms[options.type] : undefined,
