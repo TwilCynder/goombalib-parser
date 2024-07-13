@@ -327,7 +327,7 @@ export class MultiCompositeOptionParser extends TriggerParser {
      */
     parse(args, i){
         if (this.detectTrigger(args[i])){
-            this._state = this._state.push(args.slice(i + 1, i + this.#length + 1));
+            this._state.push(args.slice(i + 1, i + this.#length + 1));
             return this.#length;
         }
     }
