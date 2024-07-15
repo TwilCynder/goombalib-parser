@@ -43,6 +43,10 @@ function missingParamsUsageText(params){
     return params.reduce((str, param) => (str + param.parser.getUsageText(param.dest) + ", "), "").slice(0, -2)
 }
 
+function makeHelpLine(usageText, description){
+    return "\t" + usageText + "\t: " + (description ?? "(undocumented)") + "\n";
+}
+
 export class MissingArgumentError extends Error {
 
     constructor(message, missingParams, argumentsManager){
@@ -63,7 +67,7 @@ export class ArgumentsManager {
      *  parser: Parser
      *  dest: string
      *  optional: boolean
-     *  description: string
+     *  description: string | string[]
      *  hidden?: boolean
      * }[]} ParsersList 
      */
@@ -241,6 +245,7 @@ export class ArgumentsManager {
     enableHelpParameter(noEffect = false){
         this.#parameters.switch.push({
             parser: new (class extends Parser {
+                /** @type {ArgumentsManager} */
                 #am;
                 constructor(argumentsManager){
                     super();
@@ -364,9 +369,19 @@ export class ArgumentsManager {
         let result = programName ? programName + " " : "";
         for (let p of this.getAllParameters()){
             if (p.hidden) continue;
-            result += p.optional ?
-                `[${p.parser.getUsageText(p.dest)}] ` : 
-                p.parser.getUsageText(p.dest) + " ";
+
+            let usageText = p.parser.getUsageText(p.dest, p.optional);
+
+            if (typeof usageText == "string"){
+                result += p.optional && p.parser.usageTextCustomHandleOptional() ?
+                `[${usageText}] ` : 
+                usageText;
+            } else if (usageText instanceof Array){
+                result += p.optional && p.parser.usageTextCustomHandleOptional() ?
+                    usageText.map(elt => `[${elt}]`).join(" ") : 
+                    usageText.join(" ");
+            }
+            result += " "
         }
 
         return result;
@@ -376,7 +391,22 @@ export class ArgumentsManager {
         let result = "Usage : " + this.makeUsageMessage(programName) + "\n" + this.#abstract + "\n";
         for (let param of this.getAllParameters()){
             if (param.hidden) continue;
-            result += "\t" + param.parser.getUsageText(param.dest) + "\t: " + (param.description ?? "(undocumented)") + "\n";
+
+            let usageText = param.parser.getUsageDescription(param.dest, param.optional);
+            let description = param.description;
+
+            if (typeof usageText == "string"){
+                result += makeHelpLine(usageText, description)
+            } else if (usageText instanceof Array){
+                if (description instanceof Array){
+                    for (let i = 0; i < usageText.length; i++){
+                        result += makeHelpLine(usageText[i], description[i]);
+                    }
+                } else {
+                    result += makeHelpLine(usageText.join(","), description);
+                }
+            }
+            
         }
         return result;
     }

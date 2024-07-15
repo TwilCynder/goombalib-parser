@@ -32,15 +32,26 @@ export class Parser {
 
 
     /**
-     * Returns a short string describing the syntax for the arguments this parser is looking for.
+     * Returns a short string describing the basic syntax of each argument this parser is looking for.
      * @param {string} name the name associated with this instance of the Parser. See implementations of this method for good examples.
+     * @returns {string | string[]}
      */
-    getUsageText(name, optional){
+    getUsageDescription(name){
         return "Unknown parameter : " + name;
     }
 
+    /**
+     * Returns a short string describing the syntax for the arguments this parser is looking for, including indicators of optionality or repetition
+     * @param {string} name the name associated with this instance of the Parser. See implementations of this method for good examples.
+     * @param {boolean} optional whether this parser has been marked as optional or not, in it's use context
+     * @returns {string | string[]}
+     */
+    getUsageText(name, optional){
+        return this.getUsageDescription(name);
+    }
+
     usageTextCustomHandleOptional(){
-        return false;
+        return true;
     }
 
     /**
@@ -74,13 +85,19 @@ export class Parser {
     }
 }
 
+class NativeParser extends Parser {
+    usageTextCustomHandleOptional(){
+        return false;
+    }
+}
+
 /**
  * Parser for parseArguments used to determine an output mode (output file, stdout) consumes the following arguments : 
  * - "-o" followed by a filename (meaning it will consume the next argument too) -> state will contain this filename in the "file" property
  * - "--stringified-output" : property "stdout" of the state will contain "string"
  * - "--log-output" : property "stdout" of the state will contain "log"
  */
-export class OutputModeParser extends Parser {
+export class OutputModeParser extends NativeParser {
     constructor(default_stdout_mode = null, default_file = null){
         super();
         this._state = {
@@ -106,7 +123,7 @@ export class OutputModeParser extends Parser {
         return false;
     }
 
-    getUsageText(){
+    getUsageDescription(){
         return "[-o file] [--stringified-output | --log-output]"
     }
 }
@@ -114,7 +131,7 @@ export class OutputModeParser extends Parser {
 /**
  * Parser for parseArguments that saves all argumements it received
  */
-export class AllArgumentsParser extends Parser {
+export class AllArgumentsParser extends NativeParser {
     constructor(){
         super();
         this._state = [];
@@ -125,7 +142,7 @@ export class AllArgumentsParser extends Parser {
         return true;
     }
 
-    getUsageText(name){
+    getUsageDescription(name){
         return `<${name}> ...`
     }
 }
@@ -133,7 +150,7 @@ export class AllArgumentsParser extends Parser {
 /**
  * Parser for parseArguments that saves a single argument (and returns it as its state)
  */
-export class SingleArgumentParser extends Parser {
+export class SingleArgumentParser extends NativeParser {
     #last
 
     /**
@@ -152,12 +169,12 @@ export class SingleArgumentParser extends Parser {
         }
     }
 
-    getUsageText(name){
+    getUsageDescription(name){
         return `<${name}>`
     }
 }
 
-export class TriggerParser extends Parser {
+export class TriggerParser extends NativeParser {
     #trigger;
 
     /**
@@ -190,7 +207,7 @@ export class TriggerParser extends Parser {
         return this.isTriggerArray() ? this.#detectTriggerArray(arg) : this.#detectTriggerSingle(arg);
     }
 
-    getUsageText(){
+    getUsageDescription(){
         if (this.isTriggerArray()){
             let res = "";
             for (let i = 0; i < this.#trigger.length - 1; i++){
@@ -243,8 +260,8 @@ export class SingleOptionParser extends TriggerParser {
         }
     } 
 
-    getUsageText(name){
-        return super.getUsageText() + ` <${name}>`;
+    getUsageDescription(name){
+        return super.getUsageDescription() + ` <${name}>`;
     }
 
 }
@@ -265,8 +282,12 @@ export class MultiOptionParser extends TriggerParser {
         }
     }
 
+    getUsageDescription(name){
+        return super.getUsageDescription() + ` <${name}>`
+    }
+
     getUsageText(name){
-        return "(" + super.getUsageText() + ` <${name}>` + ")...";
+        return "(" + this.getUsageDescription(name) + ")...";
     }
 }
 
@@ -298,9 +319,9 @@ export class CompositeOptionParser extends TriggerParser {
         }
     }
 
-    getUsageText(name){
+    getUsageDescription(name){
         let names = this.#optionsNames ?? Array(this.#length).fill(null).map((_, i) => name + "" + i);
-        return super.getUsageText() + " " + names.map(name => `<${name}> `).join(" ");
+        return super.getUsageDescription() + " " + names.map(name => `<${name}> `).join(" ");
     }
 }
 
@@ -332,13 +353,17 @@ export class MultiCompositeOptionParser extends TriggerParser {
         }
     }
 
-    getUsageText(name){
+    getUsageDescription(name){
         let names = this.#optionsNames ?? Array(this.#length).fill(null).map((_, i) => name + "" + i);
-        return "(" + super.getUsageText() + " " + names.map(name => `<${name}> `).join(" ") + ")...";
+        return super.getUsageDescription() + " " + names.map(name => `<${name}> `).join(" ")
+    }
+
+    getUsageText(name){
+        "(" + this.getUsageDescription(name) + ")...";
     }
 }
 
-export class SinglePropertyParser extends Parser {
+export class SinglePropertyParser extends NativeParser {
     #propName;
 
     constructor(propName, default_value = null){
@@ -348,13 +373,13 @@ export class SinglePropertyParser extends Parser {
     }
 
     parse(args, i){
-        let [prop, value] = Parser.propertyAssignment(args[i]);
+        let [prop, value] = NativeParser.propertyAssignment(args[i]);
         if (prop && prop == this.#propName){
             this._state = value;
         }
     }
 
-    getUsageText(name){
+    getUsageDescription(name){
         return this.#propName + "=<" + name + ">";
     }
 }
@@ -364,21 +389,21 @@ export class SinglePropertyParser extends Parser {
  * and returns an object with all these pairs as key-values.  
  */
 
-export class PropertiesParser extends Parser {
+export class PropertiesParser extends NativeParser {
     constructor(){
         super();
         this._state = {};
     } 
 
     parse(args, i){
-        let [prop, value] = Parser.propertyAssignment(args[i]);
+        let [prop, value] = NativeParser.propertyAssignment(args[i]);
         if (prop){
             this._state[prop] = value;
             return true;
         }
     }
 
-    getUsageText(name){
+    getUsageDescription(name){
         return "(additional configuration properties) propName=value";
     }
 }
@@ -396,7 +421,7 @@ export function parseArgumentsNamed(args, parsers, namedArgumentsParsing){
         let parsers_ = Object.values(parsers);
         for (let argIndex = 0; argIndex < args.length; argIndex++){
             if (namedArgumentsParsing){
-                let [prop, value] = Parser.propertyAssignment(args[argIndex]);
+                let [prop, value] = NativeParser.propertyAssignment(args[argIndex]);
                 if (prop){
                     result[prop] = value;
                     continue;
@@ -428,7 +453,7 @@ export function parseArgumentsNamed(args, parsers, namedArgumentsParsing){
 /**
  * Goes through all the given arguments and feeds them to each given Parser, then returns an array containing the final state of each Parser
  * @param {string[]} args 
- * @param  {...Parser} parsers 
+ * @param  {...NativeParser} parsers 
  * @returns 
  */
 export function parseArguments(args, ...parsers){

@@ -13,6 +13,14 @@ class CountParser extends TriggerParser {
             return true;
         }
     }
+
+    getUsageDescription(){
+        return ["-c", "-C"];
+    }
+
+    getUsageText(){
+        return ["[-c]", "[-C]"]
+    }
 }
 
 function config(am){
@@ -33,7 +41,7 @@ manager
     .addOption(["-p", "--composite"], {description: "An option composed of two separate arguments", length: 3, optionsNames: ["opt1", "opt2", "opt3"]})
     .setAbstract("A test program")
     .addMultiParameter("files")
-    .addCustomParser(new CountParser("-c"), "count", {description: "Counts how many -c in the args"}, true)
+    .addCustomParser(new CountParser("-c"), "count", {description: ["Counts how many -c in the args", "same"]}, true)
     .apply(config)
     .setMissingArgumentBehavior("Missing mandatory argument(s)", null, false)
     .enableHelpParameter(false)
