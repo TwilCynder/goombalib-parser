@@ -55,6 +55,14 @@ export class Parser {
     }
 
     /**
+     * Returns the default description for this parser, used for example by ArgumentsManager when a custom parser is given no description.
+     * @returns {string?}
+     */
+    getDefaultDescription(){
+        return null;
+    }
+
+    /**
      * Returns the ith element in the args array, or handles the case where the requested index is out of bounds 
      * (typically, when parsing argument n° x you needed to read the next argument but that argument was not provided).
      * In that case, it calls the onMissingArgument method. Should that method throw an exception, this exception would be handled

@@ -393,7 +393,7 @@ export class ArgumentsManager {
             if (param.hidden) continue;
 
             let usageText = param.parser.getUsageDescription(param.dest, param.optional);
-            let description = param.description;
+            let description = param.description ?? param.parser.getDefaultDescription();
 
             if (typeof usageText == "string"){
                 result += makeHelpLine(usageText, description)
