@@ -44,6 +44,7 @@ manager
     .addCustomParser(new CountParser("-c"), "count", {description: ["Counts how many -c in the args", "same"]}, true)
     .apply(config)
     .setMissingArgumentBehavior("Missing mandatory argument(s)", null, false)
+    .enableRecursiveResult()
     .enableHelpParameter(false)
     .enablePropertyArguments("props")
 

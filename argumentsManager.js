@@ -94,6 +94,7 @@ export class ArgumentsManager {
     #abstract = "";
 
     #missingArgumentBehavior = {throw_: true, message: null, errorCode: 0, log : false};
+    #recursiveResult = false;
 
     setAbstract(abstract){
         this.#abstract = abstract;
@@ -171,7 +172,7 @@ export class ArgumentsManager {
     /**
      * 
      * @param {string | string[]} triggers 
-     * @param {{dest?: string, description?: string, default?: any, type?: string, length: number, optionsNames: string[]}} options 
+     * @param {{dest?: string, description?: string, default?: any, type?: string, length: number, names: string[]}} options 
      */
     addOption(triggers, options = {}, optional = true){
         let dest;
@@ -183,7 +184,7 @@ export class ArgumentsManager {
         }
 
         this.#parameters.option.push({
-            parser: options.length > 1 ? new CompositeOptionParser(triggers, options.length, options.optionsNames) : new SingleOptionParser(triggers, options.default),
+            parser: options.length > 1 ? new CompositeOptionParser(triggers, options.length, options.names) : new SingleOptionParser(triggers, options.default),
             dest,
             optional,
             transform: options.type ? transforms[options.type] : undefined,
@@ -196,7 +197,7 @@ export class ArgumentsManager {
     /**
      * 
      * @param {string | string[]} triggers 
-     * @param {{dest?: string, description?: string, default?: any, type?: string, length: number, optionsNames: string[]}} options 
+     * @param {{dest?: string, description?: string, default?: any, type?: string, length: number, names: string[]}} options 
      */
     addMultiOption(triggers, options = {}){
         let dest;
@@ -208,7 +209,7 @@ export class ArgumentsManager {
         }
 
         this.#parameters.option.push({
-            parser: options.length > 1 ? new MultiCompositeOptionParser(triggers, options.length, options.optionsNames) : new MultiOptionParser(triggers),
+            parser: options.length > 1 ? new MultiCompositeOptionParser(triggers, options.length, options.names) : new MultiOptionParser(triggers),
             dest,
             optional: true,
             transform: options.type ? transforms[options.type] : undefined,
@@ -239,6 +240,11 @@ export class ArgumentsManager {
             description, 
         });
 
+        return this;
+    }
+
+    enableRecursiveResult(dest = "all"){
+        this.#recursiveResult = dest;
         return this;
     }
 
@@ -356,6 +362,10 @@ export class ArgumentsManager {
             if (this.#missingArgumentBehavior.throw_){
                 throw new MissingArgumentError(this.#missingArgumentBehavior.message, missingArguments);
             }
+        }
+
+        if (this.#recursiveResult){
+            result[this.#recursiveResult] = result;
         }
 
         return result;

@@ -157,6 +157,18 @@ This help message is composed of
 - Optionnaly, a short text configured with `setAbstract`
 - A list of the parsers, with their description.  
 
+##### .enableRecursiveResult(dest = "all")
+If this method is called with a string parameter, the result object of the parsing will contain a property pointing to itself (with the name specified by "dest").  
+This means that after running
+```js
+let {param1, param2, all} = new ArgumentsManager()
+    //...
+    .enableRecursiveResult()
+    .parseProcessArguments()
+```
+the "all" variable will contain the whole result of .parseProcessArguments(), including itself.  
+This is useful when you want to use the destructuring argument to assign the results to variables, but also keep the whole result object somewhere.  
+
 ##### .setMissingArgumentBehavior(message, errorCode, throw_ = true)
 Configures the behavior of the parsing methods in case a mandatory argument is missing.  
 - "message" (string) will set the text message displayed or raised, depending on the next arguments. Note that this message will be followed by " : " and the destination name of the parameter that's missing.  
